@@ -57,8 +57,10 @@ function rewritePlaylist(text, playlistUrl) {
     }
   }).join("\n");
 }
-app.use("/hls", (req, res, next) => {
-  req.url = "/api" + req.originalUrl;
+app.use((req, res, next) => {
+  if (req.path.startsWith("/hls/")) {
+    req.url = "/api" + req.url;
+  }
   next();
 });
 app.all("/api/*", async (req, res) => {
