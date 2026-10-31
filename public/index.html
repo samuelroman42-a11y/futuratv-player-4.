@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07111f">
+<title>FuturaTv Player</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#07111f;color:#f4f8ff;font-family:Arial,sans-serif}
+header{height:75px;background:#0b192b;border-bottom:1px solid #263b55;display:flex;align-items:center;padding:0 25px;gap:14px}
+.logo{background:linear-gradient(140deg,#36d7ef,#0879ed);color:#07111f;border-radius:13px;padding:10px 15px;font-size:25px;font-weight:900}
+header strong{font-size:21px}
+header span{color:#36cafa}
+main{max-width:1200px;margin:45px auto;padding:20px}
+.login{max-width:480px;margin:45px auto;background:#10243b;border:1px solid #29445f;border-radius:20px;padding:30px}
+h1{font-size:30px;margin-top:0}
+p{color:#9bb0c8}
+label{display:block;margin:18px 0 7px;font-size:13px;font-weight:bold}
+input{width:100%;padding:15px;border-radius:10px;border:1px solid #34516f;background:#071626;color:white;font-size:15px}
+button{cursor:pointer;border:0;border-radius:10px;padding:14px;background:#087fe9;color:white;font-weight:bold;font-size:15px}
+#connect{width:100%;margin-top:22px;background:linear-gradient(100deg,#0879ed,#19b8e8);color:#061426}
+#error{color:#ff7777;white-space:pre-wrap;font-size:13px;margin-top:15px}
+.hidden{display:none!important}
+nav{display:flex;gap:10px;margin:25px 0;flex-wrap:wrap}
+nav button{background:#142b45}
+nav button.active{background:#087fe9}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:20px}
+.categories{background:#10243b;padding:12px;border-radius:12px}
+.categories button{display:block;width:100%;text-align:left;background:transparent;color:white;margin:3px 0}
+.categories button.active{background:#17456e}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:15px}
+.item{background:#10243b;border:1px solid #29445f;border-radius:12px;overflow:hidden;text-align:left;padding:0}
+.item img{width:100%;height:190px;object-fit:cover}
+.item div{padding:12px;color:white}
+#player{position:fixed;inset:0;background:#000e;display:grid;place-items:center;padding:15px;z-index:10}
+.playerbox{width:min(1100px,100%);background:#10243b;padding:15px;border-radius:15px}
+video{width:100%;max-height:75vh;background:black}
+.playerbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+#status{color:#9bb0c8;margin:12px 0}
+@media(max-width:650px){main{padding:12px;margin:20px auto}.layout{grid-template-columns:1fr}.categories{display:flex;overflow:auto}.categories button{white-space:nowrap;width:auto}.login{padding:20px}}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="logo">F</div>
+ <strong>FuturaTv <span>PLAYER</span></strong>
+</header>
+
+<main>
+<section id="login" class="login">
+ <h1>Bienvenido a FuturaTv</h1>
+ <p>Accede con tus datos Xtream Codes.</p>
+
+ <label>USUARIO</label>
+ <input id="username" autocomplete="username" placeholder="Tu usuario">
+
+ <label>CONTRASEÑA</label>
+ <input id="password" type="password" autocomplete="current-password" placeholder="Tu contraseña">
+
+ <button id="connect">CONECTAR</button>
+ <div id="error"></div>
+ <p>Utiliza únicamente servicios y contenidos autorizados.</p>
+</section>
+
+<section id="app" class="hidden">
+ <h1 id="heading">Televisión en directo</h1>
+ <div id="status"></div>
+
+ <nav>
+  <button class="active" data-section="live">Televisión</button>
+  <button data-section="movie">Películas</button>
+  <button data-section="series">Series</button>
+ </nav>
+
+ <input id="search" placeholder="Buscar contenido...">
+
+ <div class="layout" style="margin-top:20px">
+  <aside class="categories" id="categories"></aside>
+  <div class="grid" id="items"></div>
+ </div>
+</section>
+</main>
+
+<div id="player" class="hidden">
+ <div class="playerbox">
+  <div class="playerbar">
+   <strong id="playerTitle">Reproduciendo</strong>
+   <button id="close">CERRAR</button>
+  </div>
+  <video id="video" controls playsinline></video>
+ </div>
+</div>
+
+<script>
+/*
+ IMPORTANTE:
+ Sustituir esta dirección por la URL real del servicio
+ de Render cuando esté desplegado.
+*/
+const API_BASE="https://TU-SERVICIO.onrender.com/api";
+
+const $=id=>document.getElementById(id);
+
+let username="";
+let password="";
+let section="live";
+let content=[];
+let selectedCategory="";
+
+const endpoints={
+ live:["get_live_categories","get_live_streams"],
+ movie:["get_vod_categories","get_vod_streams"],
+ series:["get_series_categories","get_series"]
+};
+
+async function request(action="",extra={}){
+ const url=new URL(API_BASE+"/player_api.php");
+ url.searchParams.set("username",username);
+ url.searchParams.set("password",password);
+
+ if(action)url.searchParams.set("action",action);
+
+ Object.entries(extra).forEach(([k,v])=>{
+  url.searchParams.set(k,v);
+ });
+
+ const response=await fetch(url);
+
+ if(!response.ok)throw new Error("Error HTTP "+response.status);
+
+ return response.json();
+}
+
+$("connect").onclick=connect;
+
+async function connect(){
+ $("error").textContent="Conectando...";
+ $("connect").disabled=true;
+
+ username=$("username").value.trim();
+ password=$("password").value;
+
+ try{
+  if(!username||!password)
+   throw new Error("Introduce usuario y contraseña.");
+
+  const result=await request();
+
+  if(Number(result?.user_info?.auth)!==1)
+   throw new Error("El servidor no ha aceptado el acceso.");
+
+  $("login").classList.add("hidden");
+  $("app").classList.remove("hidden");
+
+  await loadCategories();
+
+ }catch(error){
+  $("error").textContent=
+   "No se pudo conectar: "+error.message;
+ }finally{
+  $("connect").disabled=false;
+ }
+}
+
+async function loadCategories(){
+ $("status").textContent="Cargando categorías...";
+ $("categories").innerHTML="";
+ $("items").innerHTML="";
+
+ const result=await request(endpoints[section][0]);
+
+ if(!Array.isArray(result))
+  throw new Error("No se pudieron cargar las categorías.");
+
+ result.forEach((category,index)=>{
+  const button=document.createElement("button");
+  button.textContent=category.category_name;
+
+  if(index===0)button.classList.add("active");
+
+  button.onclick=()=>{
+   document.querySelectorAll(".categories button")
+    .forEach(b=>b.classList.remove("active"));
+
+   button.classList.add("active");
+   loadItems(category.category_id);
+  };
+
+  $("categories").append(button);
+ });
+
+ if(result.length){
+  await loadItems(result[0].category_id);
+ }else{
+  $("status").textContent="No hay categorías disponibles.";
+ }
+}
+
+async function loadItems(categoryId){
+ selectedCategory=categoryId;
+ $("status").textContent="Cargando contenido...";
+ $("items").innerHTML="";
+
+ try{
+  content=await request(endpoints[section][1],{
+   category_id:categoryId
+  });
+
+  if(!Array.isArray(content))content=[];
+
+  renderItems();
+ }catch(error){
+  $("status").textContent="Error: "+error.message;
+ }
+}
+
+function renderItems(){
+ const query=$("search").value.toLowerCase();
+ $("items").innerHTML="";
+
+ const filtered=content.filter(item=>
+  (item.name||"").toLowerCase().includes(query)
+ );
+
+ filtered.forEach(item=>{
+  const button=document.createElement("button");
+  button.className="item";
+
+  const image=document.createElement("img");
+  image.src=item.stream_icon||item.cover||"";
+  image.alt="";
+
+  const title=document.createElement("div");
+  title.textContent=item.name||"Contenido";
+
+  button.append(image,title);
+  button.onclick=()=>playItem(item);
+
+  $("items").append(button);
+ });
+
+ $("status").textContent=filtered.length+" resultados";
+}
+
+$("search").oninput=renderItems;
+
+document.querySelectorAll("[data-section]").forEach(button=>{
+ button.onclick=async()=>{
+  section=button.dataset.section;
+
+  document.querySelectorAll("[data-section]")
+   .forEach(b=>b.classList.remove("active"));
+
+  button.classList.add("active");
+
+  $("heading").textContent={
+   live:"Televisión en directo",
+   movie:"Películas",
+   series:"Series"
+  }[section];
+
+  try{
+   await loadCategories();
+  }catch(error){
+   $("status").textContent=error.message;
+  }
+ };
+});
+
+function playItem(item){
+ if(section==="series"){
+  $("status").textContent=
+   "La reproducción de episodios se configurará en la siguiente fase.";
+  return;
+ }
+
+ const folder=section==="live"?"live":"movie";
+ const extension=section==="live"
+  ?"m3u8"
+  :(item.container_extension||"mp4");
+
+ const path=
+  "/"+folder+"/"+encodeURIComponent(username)+
+  "/"+encodeURIComponent(password)+
+  "/"+item.stream_id+"."+extension;
+
+ $("playerTitle").textContent=item.name;
+ $("video").src=API_BASE+path;
+ $("player").classList.remove("hidden");
+
+ $("video").play().catch(()=>{});
+}
+
+$("close").onclick=()=>{
+ $("video").pause();
+ $("video").removeAttribute("src");
+ $("video").load();
+ $("player").classList.add("hidden");
+};
+</script>
+</body>
+</html>
