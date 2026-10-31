@@ -1,305 +1,404 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#07111f">
 <title>FuturaTv Player</title>
 <style>
+:root{--bg:#07111f;--panel:#101e31;--panel2:#14263d;--line:#263b55;--blue:#168cff;--cyan:#36d7ef;--txt:#f4f8ff;--muted:#91a5bd;--danger:#ff7777}
 *{box-sizing:border-box}
-body{margin:0;background:#07111f;color:#f4f8ff;font-family:Arial,sans-serif}
-header{height:75px;background:#0b192b;border-bottom:1px solid #263b55;display:flex;align-items:center;padding:0 25px;gap:14px}
-.logo{background:linear-gradient(140deg,#36d7ef,#0879ed);color:#07111f;border-radius:13px;padding:10px 15px;font-size:25px;font-weight:900}
-header strong{font-size:21px}
-header span{color:#36cafa}
-main{max-width:1200px;margin:45px auto;padding:20px}
-.login{max-width:480px;margin:45px auto;background:#10243b;border:1px solid #29445f;border-radius:20px;padding:30px}
-h1{font-size:30px;margin-top:0}
-p{color:#9bb0c8}
-label{display:block;margin:18px 0 7px;font-size:13px;font-weight:bold}
-input{width:100%;padding:15px;border-radius:10px;border:1px solid #34516f;background:#071626;color:white;font-size:15px}
-button{cursor:pointer;border:0;border-radius:10px;padding:14px;background:#087fe9;color:white;font-weight:bold;font-size:15px}
-#connect{width:100%;margin-top:22px;background:linear-gradient(100deg,#0879ed,#19b8e8);color:#061426}
-#error{color:#ff7777;white-space:pre-wrap;font-size:13px;margin-top:15px}
+body{margin:0;background:radial-gradient(ellipse at 15% -10%,#123e66 0,transparent 42%),var(--bg);color:var(--txt);font:15px Inter,system-ui,Arial}
+button,input{font:inherit}
+.top{height:72px;border-bottom:1px solid #20344c;background:#07111feF;display:flex;align-items:center;padding:0 5vw;gap:13px;position:sticky;top:0;z-index:3;backdrop-filter:blur(16px)}
+.mark{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#39d7ed,#0879ec);display:grid;place-items:center;color:#061426;font-weight:1000;font-size:25px}
+.brand{font-weight:900;letter-spacing:.2px;font-size:19px}
+.brand span{color:#52cfff}
+.topright{margin-left:auto;color:var(--muted);font-size:12px}
+.wrap{max-width:1450px;margin:auto;padding:38px 5vw}
+.hero{display:flex;align-items:end;justify-content:space-between;margin-bottom:25px;gap:20px}
+.eyebrow{color:#51cfff;text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800}
+.hero h1{font-size:clamp(27px,4vw,42px);margin:8px 0}
+.sub{color:var(--muted);margin:0}
+.login{max-width:520px;margin:35px auto 70px;background:linear-gradient(145deg,#142943,#0d1a2b);border:1px solid #2b4562;border-radius:24px;padding:30px;box-shadow:0 24px 80px #0006}
+.login h2{font-size:25px;margin:0 0 7px}
+.fields{display:grid;gap:15px;margin-top:25px}
+label{display:block;color:#b6c8dc;font-size:12px;font-weight:700;margin-bottom:7px}
+input{width:100%;border:1px solid #314b68;background:#081626;color:white;border-radius:12px;padding:14px 15px;outline:none}
+input:focus{border-color:#2c9fff;box-shadow:0 0 0 3px #168cff22}
+.btn{border:0;border-radius:12px;padding:13px 17px;background:#1a304a;color:#fff;font-weight:800;cursor:pointer}
+.primary{background:linear-gradient(100deg,#0879ed,#19b8e8);color:#031426;width:100%;margin-top:20px}
+.btn:disabled{opacity:.6;cursor:wait}
+.hint{font-size:12px;color:var(--muted);line-height:1.6}
+.error{color:var(--danger);white-space:pre-wrap;font-size:13px;margin-top:12px}
 .hidden{display:none!important}
-nav{display:flex;gap:10px;margin:25px 0;flex-wrap:wrap}
-nav button{background:#142b45}
-nav button.active{background:#087fe9}
-.layout{display:grid;grid-template-columns:230px 1fr;gap:20px}
-.categories{background:#10243b;padding:12px;border-radius:12px}
-.categories button{display:block;width:100%;text-align:left;background:transparent;color:white;margin:3px 0}
-.categories button.active{background:#17456e}
+.apphead{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.apphead h2{margin:0;font-size:26px}
+.tabs{display:flex;gap:8px;margin:22px 0;flex-wrap:wrap}
+.tab{background:#11233a;border:1px solid #29415d;color:#b8cbe0;border-radius:999px;padding:10px 17px;cursor:pointer}
+.tab.active{background:#087fe9;color:#fff;border-color:#168cff}
+.tools{display:flex;gap:10px;align-items:center}
+.tools input{max-width:300px}
+.layout{display:grid;grid-template-columns:235px 1fr;gap:20px}
+.side{background:#0d1b2c;border:1px solid #20364f;border-radius:17px;padding:13px;height:max-content;max-height:70vh;overflow:auto}
+.side h3{font-size:11px;color:#819bb6;text-transform:uppercase;letter-spacing:1.5px;padding:5px 8px}
+.cat{display:block;width:100%;text-align:left;background:none;border:0;color:#c8d8e8;padding:11px 10px;border-radius:9px;cursor:pointer}
+.cat:hover,.cat.active{background:#15385a;color:#fff}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:15px}
-.item{background:#10243b;border:1px solid #29445f;border-radius:12px;overflow:hidden;text-align:left;padding:0}
-.item img{width:100%;height:190px;object-fit:cover}
-.item div{padding:12px;color:white}
-#player{position:fixed;inset:0;background:#000e;display:grid;place-items:center;padding:15px;z-index:10}
-.playerbox{width:min(1100px,100%);background:#10243b;padding:15px;border-radius:15px}
-video{width:100%;max-height:75vh;background:black}
-.playerbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-#status{color:#9bb0c8;margin:12px 0}
-@media(max-width:650px){main{padding:12px;margin:20px auto}.layout{grid-template-columns:1fr}.categories{display:flex;overflow:auto}.categories button{white-space:nowrap;width:auto}.login{padding:20px}}
+.tile{border:1px solid #203a55;background:#0f2034;border-radius:14px;overflow:hidden;color:#fff;text-align:left;cursor:pointer;transition:.18s}
+.tile:hover{transform:translateY(-3px);border-color:#168cff}
+.poster{height:190px;background:linear-gradient(145deg,#183d61,#0b1727);display:grid;place-items:center;color:#5cccf5;font-size:32px}
+.poster img{width:100%;height:100%;object-fit:cover}
+.tiletitle{padding:11px;font-weight:700;font-size:13px;min-height:55px}
+.empty{padding:40px;text-align:center;color:var(--muted);border:1px dashed #2b4562;border-radius:15px}
+.status{color:var(--muted);font-size:12px}
+.player{position:fixed;inset:0;background:#020711f2;z-index:8;display:grid;place-items:center;padding:20px}
+.playerbox{width:min(1150px,100%);background:#0b1929;border:1px solid #29415d;border-radius:18px;padding:14px}
+.playerbar{display:flex;justify-content:space-between;align-items:center;padding:5px 5px 13px}
+.player video{width:100%;max-height:75vh;background:#000;border-radius:10px}
+.close{background:#20354e}
+@media(max-width:760px){
+.wrap{padding:25px 16px}
+.layout{grid-template-columns:1fr}
+.side{display:flex;max-height:135px;overflow:auto}
+.side h3{display:none}
+.cat{white-space:nowrap;width:auto}
+.poster{height:150px}
+.top{padding:0 17px}
+.topright{display:none}
+.login{padding:23px;margin-top:22px}
+}
 </style>
 </head>
 <body>
 
-<header>
- <div class="logo">F</div>
- <strong>FuturaTv <span>PLAYER</span></strong>
+<header class="top">
+<div class="mark">F</div>
+<div class="brand">FuturaTv <span>PLAYER</span></div>
+<div class="topright">TU TELEVISIÓN, EN UN SOLO LUGAR</div>
+<button id="logout" class="btn hidden">Salir</button>
 </header>
 
-<main>
-<section id="login" class="login">
- <h1>Bienvenido a FuturaTv</h1>
- <p>Accede con tus datos Xtream Codes.</p>
-
- <label>USUARIO</label>
- <input id="username" autocomplete="username" placeholder="Tu usuario">
-
- <label>CONTRASEÑA</label>
- <input id="password" type="password" autocomplete="current-password" placeholder="Tu contraseña">
-
- <button id="connect">CONECTAR</button>
- <div id="error"></div>
- <p>Utiliza únicamente servicios y contenidos autorizados.</p>
+<section id="login" class="wrap">
+<div class="hero">
+<div>
+<div class="eyebrow">Experiencia de entretenimiento</div>
+<h1>Todo empieza aquí.</h1>
+<p class="sub">Accede con tus datos Xtream Codes.</p>
+</div>
+</div>
+<div class="login">
+<h2>Bienvenido</h2>
+<p class="sub">Introduce los datos de acceso de tu servicio.</p>
+<div class="fields">
+<div>
+<label for="server">SERVIDOR DE CONEXIÓN</label>
+<input id="server" value="https://futuratv-conexion.onrender.com" readonly aria-readonly="true">
+</div>
+<div>
+<label for="user">USUARIO</label>
+<input id="user" placeholder="Tu usuario" autocomplete="username">
+</div>
+<div>
+<label for="pass">CONTRASEÑA</label>
+<input id="pass" type="password" placeholder="Tu contraseña" autocomplete="current-password">
+</div>
+</div>
+<button id="connect" class="btn primary">CONECTAR AHORA</button>
+<div id="err" class="error"></div>
+<p class="hint">Conexión exclusiva mediante Xtream Codes. Utiliza únicamente servicios y contenidos autorizados.</p>
+</div>
 </section>
 
-<section id="app" class="hidden">
- <h1 id="heading">Televisión en directo</h1>
- <div id="status"></div>
-
- <nav>
-  <button class="active" data-section="live">Televisión</button>
-  <button data-section="movie">Películas</button>
-  <button data-section="series">Series</button>
- </nav>
-
- <input id="search" placeholder="Buscar contenido...">
-
- <div class="layout" style="margin-top:20px">
-  <aside class="categories" id="categories"></aside>
-  <div class="grid" id="items"></div>
- </div>
+<main id="app" class="wrap hidden">
+<div class="apphead">
+<div>
+<div class="eyebrow">Biblioteca FuturaTv</div>
+<h2 id="heading">Televisión en directo</h2>
+<div id="status" class="status"></div>
+</div>
+<div class="tools">
+<input id="search" placeholder="Buscar…">
+</div>
+</div>
+<nav class="tabs">
+<button class="tab active" data-section="live">En directo</button>
+<button class="tab" data-section="movie">Películas</button>
+<button class="tab" data-section="series">Series</button>
+</nav>
+<div class="layout">
+<aside class="side">
+<h3>Categorías</h3>
+<div id="cats"></div>
+</aside>
+<section>
+<div id="items" class="grid"></div>
+<div id="empty" class="empty hidden"></div>
 </section>
+</div>
 </main>
 
-<div id="player" class="hidden">
- <div class="playerbox">
-  <div class="playerbar">
-   <strong id="playerTitle">Reproduciendo</strong>
-   <button id="close">CERRAR</button>
-  </div>
-  <video id="video" controls playsinline></video>
- </div>
+<div id="player" class="player hidden">
+<div class="playerbox">
+<div class="playerbar">
+<b id="ptitle">Reproduciendo</b>
+<button id="close" class="btn close">Cerrar ✕</button>
+</div>
+<video id="video" controls playsinline></video>
+</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+
 <script>
-/*
- IMPORTANTE:
- Sustituir esta dirección por la URL real del servicio
- de Render cuando esté desplegado.
-*/
-const API_BASE="https://futuratv-conexion.onrender.com/api";";
-
 const $=id=>document.getElementById(id);
+let section='live',credentials=null,categories=[],items=[],activeCat=null;
 
-let username="";
-let password="";
-let section="live";
-let content=[];
-let selectedCategory="";
+const API_BASE='https://futuratv-conexion.onrender.com/api';
 
-const endpoints={
- live:["get_live_categories","get_live_streams"],
- movie:["get_vod_categories","get_vod_streams"],
- series:["get_series_categories","get_series"]
+const actions={
+live:['get_live_categories','get_live_streams'],
+movie:['get_vod_categories','get_vod_streams'],
+series:['get_series_categories','get_series']
 };
 
-async function request(action="",extra={}){
- const url=new URL(API_BASE+"/player_api.php");
- url.searchParams.set("username",username);
- url.searchParams.set("password",password);
-
- if(action)url.searchParams.set("action",action);
-
- Object.entries(extra).forEach(([k,v])=>{
-  url.searchParams.set(k,v);
- });
-
- const response=await fetch(url);
-
- if(!response.ok)throw new Error("Error HTTP "+response.status);
-
- return response.json();
+async function api(action='',extra={}){
+const u=new URL(API_BASE+'/player_api.php');
+u.searchParams.set('username',credentials.user);
+u.searchParams.set('password',credentials.pass);
+if(action)u.searchParams.set('action',action);
+for(const [k,v] of Object.entries(extra))u.searchParams.set(k,v);
+const r=await fetch(u);
+if(!r.ok)throw Error('El servicio respondió con HTTP '+r.status);
+return r.json();
 }
 
-$("connect").onclick=connect;
+$('connect').onclick=connect;
+$('logout').onclick=()=>location.reload();
+$('close').onclick=closePlayer;
+$('search').oninput=render;
+
+document.querySelectorAll('[data-section]').forEach(
+b=>b.onclick=()=>switchSection(b.dataset.section)
+);
 
 async function connect(){
- $("error").textContent="Conectando...";
- $("connect").disabled=true;
+$('err').textContent='Conectando…';
+$('connect').disabled=true;
 
- username=$("username").value.trim();
- password=$("password").value;
+try{
+const user=$('user').value.trim();
+const pass=$('pass').value;
 
- try{
-  if(!username||!password)
-   throw new Error("Introduce usuario y contraseña.");
+if(!user||!pass)throw Error('Completa usuario y contraseña.');
 
-  const result=await request();
+credentials={user,pass};
 
-  if(Number(result?.user_info?.auth)!==1)
-   throw new Error("El servidor no ha aceptado el acceso.");
+const info=await api();
 
-  $("login").classList.add("hidden");
-  $("app").classList.remove("hidden");
+if(Number(info?.user_info?.auth)!==1)
+throw Error('El servidor no ha aceptado el acceso. Comprueba los datos.');
 
-  await loadCategories();
+$('login').classList.add('hidden');
+$('app').classList.remove('hidden');
+$('logout').classList.remove('hidden');
 
- }catch(error){
-  $("error").textContent=
-   "No se pudo conectar: "+error.message;
- }finally{
-  $("connect").disabled=false;
- }
+await loadCategories();
+
+}catch(e){
+$('err').textContent='No se pudo conectar: '+e.message+
+'\nComprueba que Render esté activo y que ALLOWED_ORIGIN coincida con este dominio.';
+}finally{
+$('connect').disabled=false;
+}
 }
 
 async function loadCategories(){
- $("status").textContent="Cargando categorías...";
- $("categories").innerHTML="";
- $("items").innerHTML="";
+const [catAction]=actions[section];
+$('status').textContent='Cargando categorías…';
 
- const result=await request(endpoints[section][0]);
+categories=await api(catAction);
 
- if(!Array.isArray(result))
-  throw new Error("No se pudieron cargar las categorías.");
+if(!Array.isArray(categories))
+throw Error('Respuesta de categorías no válida.');
 
- result.forEach((category,index)=>{
-  const button=document.createElement("button");
-  button.textContent=category.category_name;
+$('cats').innerHTML='';
 
-  if(index===0)button.classList.add("active");
+categories.forEach((c,i)=>{
+const b=document.createElement('button');
+b.className='cat'+(i===0?' active':'');
+b.textContent=c.category_name;
 
-  button.onclick=()=>{
-   document.querySelectorAll(".categories button")
-    .forEach(b=>b.classList.remove("active"));
+b.onclick=()=>{
+document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));
+b.classList.add('active');
+loadItems(c.category_id);
+};
 
-   button.classList.add("active");
-   loadItems(category.category_id);
-  };
-
-  $("categories").append(button);
- });
-
- if(result.length){
-  await loadItems(result[0].category_id);
- }else{
-  $("status").textContent="No hay categorías disponibles.";
- }
-}
-
-async function loadItems(categoryId){
- selectedCategory=categoryId;
- $("status").textContent="Cargando contenido...";
- $("items").innerHTML="";
-
- try{
-  content=await request(endpoints[section][1],{
-   category_id:categoryId
-  });
-
-  if(!Array.isArray(content))content=[];
-
-  renderItems();
- }catch(error){
-  $("status").textContent="Error: "+error.message;
- }
-}
-
-function renderItems(){
- const query=$("search").value.toLowerCase();
- $("items").innerHTML="";
-
- const filtered=content.filter(item=>
-  (item.name||"").toLowerCase().includes(query)
- );
-
- filtered.forEach(item=>{
-  const button=document.createElement("button");
-  button.className="item";
-
-  const image=document.createElement("img");
-  image.src=item.stream_icon||item.cover||"";
-  image.alt="";
-
-  const title=document.createElement("div");
-  title.textContent=item.name||"Contenido";
-
-  button.append(image,title);
-  button.onclick=()=>playItem(item);
-
-  $("items").append(button);
- });
-
- $("status").textContent=filtered.length+" resultados";
-}
-
-$("search").oninput=renderItems;
-
-document.querySelectorAll("[data-section]").forEach(button=>{
- button.onclick=async()=>{
-  section=button.dataset.section;
-
-  document.querySelectorAll("[data-section]")
-   .forEach(b=>b.classList.remove("active"));
-
-  button.classList.add("active");
-
-  $("heading").textContent={
-   live:"Televisión en directo",
-   movie:"Películas",
-   series:"Series"
-  }[section];
-
-  try{
-   await loadCategories();
-  }catch(error){
-   $("status").textContent=error.message;
-  }
- };
+$('cats').append(b);
 });
 
-function playItem(item){
- if(section==="series"){
-  $("status").textContent=
-   "La reproducción de episodios se configurará en la siguiente fase.";
-  return;
- }
-
- const folder=section==="live"?"live":"movie";
- const extension=section==="live"
-  ?"m3u8"
-  :(item.container_extension||"mp4");
-
- const path=
-  "/"+folder+"/"+encodeURIComponent(username)+
-  "/"+encodeURIComponent(password)+
-  "/"+item.stream_id+"."+extension;
-
- $("playerTitle").textContent=item.name;
- $("video").src=API_BASE+path;
- $("player").classList.remove("hidden");
-
- $("video").play().catch(()=>{});
+if(categories.length)
+await loadItems(categories[0].category_id);
+else
+empty('No hay categorías disponibles.');
 }
 
-$("close").onclick=()=>{
- $("video").pause();
- $("video").removeAttribute("src");
- $("video").load();
- $("player").classList.add("hidden");
-};
+async function loadItems(id){
+activeCat=id;
+$('status').textContent='Cargando contenido…';
+
+try{
+items=await api(actions[section][1],{category_id:id});
+if(!Array.isArray(items))items=[];
+render();
+}catch(e){
+empty(e.message);
+}
+}
+
+function render(){
+const q=$('search').value.toLowerCase();
+const filtered=items.filter(x=>(x.name||'').toLowerCase().includes(q));
+
+$('items').innerHTML='';
+$('status').textContent=filtered.length+' títulos';
+
+filtered.forEach(x=>{
+const b=document.createElement('button');
+b.className='tile';
+
+const p=document.createElement('div');
+p.className='poster';
+
+const src=x.stream_icon||x.cover;
+
+if(src){
+const im=document.createElement('img');
+im.src=src;
+im.loading='lazy';
+im.onerror=()=>im.remove();
+p.append(im);
+}else{
+p.textContent='▶';
+}
+
+const t=document.createElement('div');
+t.className='tiletitle';
+t.textContent=x.name||'Sin título';
+
+b.append(p,t);
+b.onclick=()=>play(x);
+
+$('items').append(b);
+});
+
+$('empty').classList.toggle('hidden',filtered.length>0);
+
+if(!filtered.length)
+$('empty').textContent='No hay resultados en esta categoría.';
+}
+
+async function switchSection(s){
+section=s;
+
+document.querySelectorAll('[data-section]').forEach(
+b=>b.classList.toggle('active',b.dataset.section===s)
+);
+
+$('heading').textContent={
+live:'Televisión en directo',
+movie:'Películas',
+series:'Series'
+}[s];
+
+$('search').value='';
+
+try{
+await loadCategories();
+}catch(e){
+empty(e.message);
+}
+}
+
+let hlsPlayer=null;
+
+function play(x){
+if(section==='series'){
+empty('El catálogo está disponible. La selección de temporadas y episodios se incorporará en la siguiente fase.');
+return;
+}
+
+const folder=section==='live'?'live':'movie';
+const ext=section==='live'?'m3u8':(x.container_extension||'mp4');
+
+const path=`/${folder}/${encodeURIComponent(credentials.user)}/${encodeURIComponent(credentials.pass)}/${x.stream_id}.${ext}`;
+
+openVideo(API_BASE+path,x.name,section==='live');
+}
+
+function openVideo(url,title,isHls){
+const video=$('video');
+
+if(hlsPlayer){
+hlsPlayer.destroy();
+hlsPlayer=null;
+}
+
+video.pause();
+video.removeAttribute('src');
+video.load();
+
+$('ptitle').textContent=title||'Reproduciendo';
+$('player').classList.remove('hidden');
+
+if(isHls&&window.Hls&&Hls.isSupported()){
+
+hlsPlayer=new Hls({
+enableWorker:true,
+lowLatencyMode:false
+});
+
+hlsPlayer.loadSource(url);
+hlsPlayer.attachMedia(video);
+
+hlsPlayer.on(Hls.Events.ERROR,(_,data)=>{
+if(data.fatal){
+$('status').textContent='Error de reproducción: '+data.type+' / '+data.details;
+}
+});
+
+hlsPlayer.on(Hls.Events.MANIFEST_PARSED,()=>{
+video.play().catch(()=>{});
+});
+
+}else{
+video.src=url;
+video.play().catch(()=>{});
+}
+}
+
+function closePlayer(){
+const video=$('video');
+
+video.pause();
+
+if(hlsPlayer){
+hlsPlayer.destroy();
+hlsPlayer=null;
+}
+
+video.removeAttribute('src');
+video.load();
+
+$('player').classList.add('hidden');
+}
+
+function empty(msg){
+$('items').innerHTML='';
+$('empty').textContent=msg;
+$('empty').classList.remove('hidden');
+}
 </script>
 </body>
 </html>
