@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: futuratv-proxy
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: IPTV_ORIGIN
+        sync: false
+      - key: ALLOWED_ORIGIN
+        sync: false
