@@ -338,44 +338,75 @@ openVideo(API_BASE+path,x.name,section==='live');
 }
 
 function openVideo(url,title,isHls){
-const video=$('video');
+  const video=$('video');
 
-if(hlsPlayer){
-hlsPlayer.destroy();
-hlsPlayer=null;
-}
+  if(hlsPlayer){
+    hlsPlayer.destroy();
+    hlsPlayer=null;
+  }
 
-video.pause();
-video.removeAttribute('src');
-video.load();
+  video.pause();
+  video.removeAttribute('src');
+  video.load();
 
-$('ptitle').textContent=title||'Reproduciendo';
-$('player').classList.remove('hidden');
+  $('ptitle').textContent=title||'Reproduciendo';
+  $('status').textContent='Preparando vídeo…';
+  $('player').classList.remove('hidden');
 
-if(isHls&&window.Hls&&Hls.isSupported()){
+  video.onerror=()=>{
+    const error=video.error;
+    const code=error ? error.code : 0;
 
-hlsPlayer=new Hls({
-enableWorker:true,
-lowLatencyMode:false
-});
+    const messages={
+      1:'Reproducción cancelada',
+      2:'Error de conexión',
+      3:'Formato o datos de vídeo no compatibles',
+      4:'Fuente de vídeo no compatible'
+    };
 
-hlsPlayer.loadSource(url);
-hlsPlayer.attachMedia(video);
+    $('status').textContent=
+      'Error '+code+': '+(messages[code]||'Error desconocido');
+  };
 
-hlsPlayer.on(Hls.Events.ERROR,(_,data)=>{
-if(data.fatal){
-$('status').textContent='Error de reproducción: '+data.type+' / '+data.details;
-}
-});
+  video.onloadedmetadata=()=>{
+    $('status').textContent='Vídeo cargado correctamente';
+  };
 
-hlsPlayer.on(Hls.Events.MANIFEST_PARSED,()=>{
-video.play().catch(()=>{});
-});
+  video.onwaiting=()=>{
+    $('status').textContent='Cargando película…';
+  };
 
-}else{
-video.src=url;
-video.play().catch(()=>{});
-}
+  if(isHls&&window.Hls&&Hls.isSupported()){
+
+    hlsPlayer=new Hls({
+      enableWorker:true,
+      lowLatencyMode:false
+    });
+
+    hlsPlayer.loadSource(url);
+    hlsPlayer.attachMedia(video);
+
+    hlsPlayer.on(Hls.Events.ERROR,(_,data)=>{
+      if(data.fatal){
+        $('status').textContent=
+          'Error HLS: '+data.type+' / '+data.details;
+      }
+    });
+
+    hlsPlayer.on(Hls.Events.MANIFEST_PARSED,()=>{
+      video.play().catch(error=>{
+        $('status').textContent='Error al iniciar: '+error.message;
+      });
+    });
+
+  }else{
+    video.src=url;
+    video.load();
+
+    video.play().catch(error=>{
+      $('status').textContent='Error al iniciar: '+error.message;
+    });
+  }
 }
 
 function closePlayer(){
