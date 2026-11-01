@@ -17,8 +17,18 @@ const upstream = new URL(IPTV_ORIGIN);
 
 app.use(helmet({ contentSecurityPolicy: false }));
 
+const allowedOrigins = new Set([
+  ...(ALLOWED_ORIGIN || "").split(",").map(origin => origin.trim()).filter(Boolean),
+  "http://localhost:8081"
+]);
+
 app.use(cors({
-  origin: ALLOWED_ORIGIN || false,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.has(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error("Origen no permitido por CORS"));
+  },
   methods: ["GET", "HEAD", "OPTIONS"]
 }));
 
